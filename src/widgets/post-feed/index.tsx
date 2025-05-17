@@ -97,15 +97,15 @@ type FootBarProps = {
   to: number | string;
 };
 
-function FootBar({ from, to }: FootBarProps) {
-  return (
-    <footer className="px-4 py-2 absolute bottom-4 flex items-center justify-center z-10 border rounded-full bg-muted/80">
-      <span className="text-xs">
-        {from} - {to}
-      </span>
-    </footer>
-  );
-}
+// function FootBar({ from, to }: FootBarProps) {
+//   return (
+//     <footer className="px-4 py-2 absolute bottom-4 flex items-center justify-center z-10 border rounded-full bg-muted/80">
+//       <span className="text-xs">
+//         {from} - {to}
+//       </span>
+//     </footer>
+//   );
+// }
 
 function Gradient() {
   return (
