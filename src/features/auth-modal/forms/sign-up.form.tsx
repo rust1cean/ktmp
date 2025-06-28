@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 
-import { Checkbox } from "@/shared/shadcn-ui/checkbox";
-import { Form } from "@/shared/shadcn-ui/form";
-import { PendingButton } from "@/shared/shadcn-ui/button";
+import { Checkbox } from "@/shared/shadcn/shadcn-ui/checkbox";
+import { Form } from "@/shared/shadcn/shadcn-ui/form";
+import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
 import {
   EmailField,
   emailFieldSchema,

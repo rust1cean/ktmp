@@ -2,9 +2,13 @@ import Link from "next/link";
 import { useUnit } from "effector-react";
 import { MenuIcon } from "lucide-react";
 
-import { $isSignedIn, $isSignedOut, $session } from "@/entities/auth";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/shadcn-ui/avatar";
-import { Button } from "@/shared/shadcn-ui/button";
+import { $isSignedIn, $isSignedOut } from "@/entities/auth";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/shadcn/shadcn-ui/avatar";
+import { Button } from "@/shared/shadcn/shadcn-ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,15 +19,19 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/shared/shadcn-ui/dropdown-menu";
+} from "@/shared/shadcn/shadcn-ui/dropdown-menu";
 import { signOutFx } from "@/entities/auth";
 import { openAuthModal } from "@/features/auth-modal";
+import type { Profile } from "@/entities/profile";
+import { Loader } from "@/shared/shadcn/shadcn-ui/loader";
+import { capitalizeFirstLetter } from "@/shared/format-string";
 
 export type MenuProps = {
+  profile: Profile | null;
   onNotifyUser: (msg: string) => void;
 };
 
-export function Menu({ onNotifyUser }: MenuProps) {
+export function Menu({ profile, onNotifyUser }: MenuProps) {
   const isSignedIn = useUnit($isSignedIn);
   const isSignedOut = useUnit($isSignedOut);
 
@@ -37,7 +45,7 @@ export function Menu({ onNotifyUser }: MenuProps) {
       <DropdownMenuContent align="end">
         {isSignedIn && (
           <>
-            <User />
+            <User profile={profile} />
             <DropdownMenuSeparator />
           </>
         )}
@@ -49,17 +57,27 @@ export function Menu({ onNotifyUser }: MenuProps) {
   );
 }
 
-function User() {
-  const userId = $session.getState()?.user.id;
-
+function User({ profile }: { profile: Profile | null }) {
   return (
-    <Link href={`/profile/${userId}`}>
+    <Link href={`/profile/${profile?.id ?? ""}`}>
       <DropdownMenuItem>
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="Avatar" />
-          <AvatarFallback>A</AvatarFallback>
+        <Avatar className="flex items-center justify-center">
+          {profile ? (
+            <>
+              <AvatarImage
+                src={profile?.avatarUrl}
+                alt="Avatar"
+                className="object-cover"
+              />
+              <AvatarFallback>
+                {profile.name.at(0)?.toUpperCase()}
+              </AvatarFallback>
+            </>
+          ) : (
+            <Loader />
+          )}
         </Avatar>
-        <span>John</span>
+        <span>{capitalizeFirstLetter(profile?.name ?? "User")}</span>
       </DropdownMenuItem>
     </Link>
   );

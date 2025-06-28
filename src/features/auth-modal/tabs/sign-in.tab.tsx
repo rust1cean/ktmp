@@ -1,5 +1,5 @@
-import { Button } from "@/shared/shadcn-ui/button";
-import { Separator } from "@/shared/shadcn-ui/separator";
+import { Button } from "@/shared/shadcn/shadcn-ui/button";
+import { Separator } from "@/shared/shadcn/shadcn-ui/separator";
 import { SignInForm, type SignInFormData } from "@/features/auth-modal/forms";
 import { OAuthProviders } from "@/features/auth-modal/tabs/oauth-providers";
 import { signInFx } from "@/entities/auth";

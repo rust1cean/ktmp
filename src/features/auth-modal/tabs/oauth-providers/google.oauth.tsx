@@ -1,6 +1,6 @@
 import { FaGoogle } from "react-icons/fa";
 
-import { PendingButton } from "@/shared/shadcn-ui/button";
+import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
 import { signInWithOAuthFx } from "@/entities/auth";
 
 export function GoogleOAuth() {

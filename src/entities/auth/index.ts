@@ -5,6 +5,7 @@ export {
   $isSignedIn,
   $isSignedOut,
   $user,
+  $myId,
   userCreated,
   userDropped,
 } from "./store";
@@ -20,3 +21,5 @@ export {
   resendOtpFx,
   updatePasswordFx,
 } from "./model";
+
+export { SessionProvider, type SessionProviderProps } from "./provider";

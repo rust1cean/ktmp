@@ -1,9 +1,10 @@
-import type { Enums } from "@/shared/api/supabase";
+import type { PostCategory } from "@/shared/data/post/api";
 
 export type Post = {
   id: string;
   title: string;
   description: string;
+  imageUrl: string | null;
   author: {
     id: string;
     name: string;
@@ -17,6 +18,5 @@ export type Post = {
   address?: string;
   postcode?: number;
   category?: PostCategory;
+  isFavorite: boolean;
 };
-
-export type PostCategory = Enums<"categories">;

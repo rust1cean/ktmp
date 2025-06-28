@@ -1,194 +1,384 @@
 "use client";
 
-import { createEvent, createStore } from "effector";
+import Image from "next/image";
+import { z } from "zod/v4";
 import { useUnit } from "effector-react";
-import { Trash2 } from "lucide-react";
-import { twMerge } from "tailwind-merge";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createEvent, createStore } from "effector";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useEffect, useMemo } from "react";
 
-import { Button } from "@/shared/shadcn-ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/shared/shadcn-ui/dialog";
-import { Input } from "@/shared/shadcn-ui/input";
-import { Label } from "@/shared/shadcn-ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/shadcn-ui/select";
-import { Textarea } from "@/shared/shadcn-ui/textarea";
-import type { Post } from "@/entities/post";
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/shared/shadcn/shadcn-ui/dialog";
+import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
+import { Form } from "@/shared/shadcn/shadcn-ui/form";
+import {
+  GREEK_PHONE_PATTERN,
+  POST_CATEGORIES,
+  type PostCategory,
+  type PostDto,
+} from "@/shared/data/post/api";
+import { capitalizeFirstLetter } from "@/shared/format-string";
+import {
+  UploadField,
+  InputField,
+  SelectField,
+  TextareaField,
+} from "@/shared/shadcn/shadcn-components/form-fields";
+import {
+  createDraftFx,
+  createPostFx,
+  updateDraftFx,
+  updatePostFx,
+  type Post,
+} from "@/entities/post";
 
-const $isPostEditorVisible = createStore(false);
-const $editablePost = createStore<Post | null>(null);
-
-export const openPostEditorCreate = createEvent();
-export const openPostEditorUpdate = createEvent<Post>();
+export const openPostCreator = createEvent();
+export const openPostEditor = createEvent<Post>();
 export const closePostEditor = createEvent();
 
-$isPostEditorVisible.on(
-  [openPostEditorCreate, openPostEditorUpdate],
-  () => true
-);
-$isPostEditorVisible.on(closePostEditor, () => false);
+const $isPostEditorVisible = createStore(false)
+  .on([openPostCreator, openPostEditor], () => true)
+  .on(closePostEditor, () => false);
 
-$editablePost.on([openPostEditorCreate, closePostEditor], () => null);
-$editablePost.on(openPostEditorUpdate, (_, editablePost) => editablePost);
+const $editablePost = createStore<Post | null>(null)
+  .on([openPostCreator, closePostEditor], () => null)
+  .on(openPostEditor, (_, newPost) => structuredClone(newPost));
 
-export function EditPostModal() {
+const $isEditingPost = $editablePost.map((post) => post !== null);
+
+export const postEditorFormSchema = z
+  .strictObject({
+    image: z
+      .file()
+      .max(5 * 1024 * 1024)
+      .mime(["image/jpeg", "image/jpg", "image/png"])
+      .nullable(),
+    title: z
+      .string()
+      .regex(/^['\w\s]+$/)
+      .min(5)
+      .max(50),
+    description: z.string().min(16).max(1000),
+    phone: z.string().regex(GREEK_PHONE_PATTERN).min(6).max(24),
+    address: z.string().min(8).max(100),
+    postcode: z.number().min(100_000).max(999_999),
+    category: z.enum(POST_CATEGORIES).nullable(),
+    price: z.number().max(100).nullable(),
+    minAge: z.number().min(0).max(17),
+    maxAge: z.number({ message: "Max age is required" }).min(1).max(18),
+  })
+  .partial({
+    image: true,
+    category: true,
+    price: true,
+  })
+  .refine(
+    ({ minAge, maxAge }) =>
+      minAge == null || (minAge != null && minAge <= maxAge),
+    "Min age must be less or equal than max age"
+  );
+
+export type PostEditorFormData = z.infer<typeof postEditorFormSchema>;
+
+async function fileToRawBase64(file: File) {
+  const arrayBuffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = "";
+  bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
+  return btoa(binary);
+}
+
+export function EditPostModal({
+  getUserId,
+}: {
+  getUserId: () => string | null | undefined;
+}) {
   const [isVisible, onClose] = useUnit([$isPostEditorVisible, closePostEditor]);
+  const [editablePost, isEditingPost] = useUnit([
+    $editablePost,
+    $isEditingPost,
+  ]);
+
+  const postEditorForm = useForm<PostEditorFormData>({
+    resolver: zodResolver(postEditorFormSchema),
+  });
+
+  const formPostImage = postEditorForm.watch("image");
+  const postImage = useMemo<string | null>(
+    () =>
+      formPostImage
+        ? URL.createObjectURL(formPostImage)
+        : editablePost?.imageUrl || null,
+    [editablePost?.imageUrl, formPostImage]
+  );
+  const isPostImageRemoved = useMemo(() => postImage == null, [postImage]);
+  const clearPostImage = () => {
+    postEditorForm.resetField("image");
+
+    if (editablePost) {
+      editablePost.imageUrl = null;
+    }
+  };
+
+  useEffect(() => {
+    postEditorForm.reset({
+      title: editablePost?.title,
+      description: editablePost?.description,
+      phone: editablePost?.phone,
+      address: editablePost?.address,
+      postcode: editablePost?.postcode,
+      category: editablePost?.category
+        ? (editablePost.category
+            .toLowerCase()
+            .replaceAll(" ", "_") as PostCategory)
+        : "none",
+      price: editablePost?.price,
+      minAge: editablePost?.minAge ?? 0,
+      maxAge: editablePost?.maxAge,
+    });
+  }, [editablePost, isVisible, postEditorForm]);
+
+  const onDraftSubmit = async (postData: PostEditorFormData) => {
+    const authorId = getUserId();
+
+    if (authorId) {
+      const postDto: PostDto = {
+        authorId,
+        title: postData.title,
+        description: postData.description,
+        phone: postData.phone,
+        postcode: postData.postcode,
+        address: postData.address,
+        minAge: postData.minAge,
+        maxAge: postData.maxAge,
+        price: postData.price,
+        category: postData.category,
+      };
+
+      if (!isPostImageRemoved && postData.image) {
+        const extension = postData.image.name.split(".").pop();
+
+        if (!extension) {
+          throw new Error("Unknown image extension");
+        }
+
+        const buffer = await fileToRawBase64(postData.image);
+
+        postDto.image = {
+          extension,
+          buffer,
+          name: postData.image.name,
+          size: postData.image.size,
+          mimeType: postData.image.type,
+        };
+      }
+
+      await (editablePost
+        ? updateDraftFx({
+            postId: editablePost.id,
+            postDto,
+          }).then(() => toast("Draft updated successfully"))
+        : createDraftFx(postDto).then(() => toast("Draft added successfully"))
+      ).then(() => {
+        onClose();
+      });
+    }
+  };
+
+  const onPostSubmit = async (postData: PostEditorFormData) => {
+    const authorId = getUserId();
+
+    if (authorId) {
+      const postDto: PostDto = {
+        authorId,
+        title: postData.title,
+        description: postData.description,
+        phone: postData.phone,
+        postcode: postData.postcode,
+        address: postData.address,
+        minAge: postData.minAge,
+        maxAge: postData.maxAge,
+        price: postData.price,
+        category: postData.category,
+      };
+
+      if (isPostImageRemoved) {
+        postDto.image = null;
+      } else if (postData.image) {
+        const extension = postData.image.name.split(".").pop();
+
+        if (!extension) {
+          throw new Error("Unknown image extension");
+        }
+
+        const buffer = await fileToRawBase64(postData.image);
+
+        postDto.image = {
+          extension,
+          buffer,
+          name: postData.image.name,
+          size: postData.image.size,
+          mimeType: postData.image.type,
+        };
+      }
+
+      await (editablePost
+        ? updatePostFx({
+            postId: editablePost.id,
+            postDto,
+          }).then(() => toast("Post updated successfully"))
+        : createPostFx(postDto).then(() => toast("Post added successfully"))
+      ).then(() => {
+        onClose();
+      });
+    }
+  };
+
+  const PostImagePreview = () =>
+    postImage && (
+      <Image
+        className="rounded-xl"
+        src={postImage}
+        alt="Image not found"
+        width={768}
+        height={480}
+      />
+    );
 
   return (
     <Dialog open={isVisible} onOpenChange={onClose}>
-      <DialogContent className="max-h-[85vh] flex flex-col gap-8">
+      <DialogContent className="max-h-[90vh] flex flex-col gap-8">
         <DialogTitle>Post editor</DialogTitle>
-        <form className="flex flex-col gap-4 overflow-y-auto">
-          <UploadField
-            id="post-image"
-            label="Upload post image"
-            optional={true}
-          />
-          <TextField type="text" id="title" label="Title" />
-          <TextField type="text" id="address" label="Address" />
-          <TextField type="phone" id="phone" label="Phone" />
-          <SelectField
-            id="category"
-            label="Category"
-            variants={[{ label: "Chemistry", value: "chemistry" }]}
-          />
-          <AgeBounds />
-          <TextField type="number" id="price" label="Price" optional={true} />
-          <TextareaField id="description" label="Description" optional={true} />
-        </form>
-        <FootBar />
+        <Form {...postEditorForm}>
+          <form className="p-1 flex flex-col gap-4 overflow-y-auto">
+            <PostImagePreview />
+            {/* TODO: Remove zod.isNullable() method */}
+            <UploadField
+              className="w-full"
+              name="image"
+              label="Upload post image"
+              optional={postEditorFormSchema.shape.image.isNullable()}
+              control={postEditorForm.control}
+              onClear={clearPostImage}
+            />
+            <InputField
+              name="title"
+              label="Title"
+              showMessage={false}
+              optional={postEditorFormSchema.shape.title.isNullable()}
+              control={postEditorForm.control}
+            />
+            <TextareaField
+              name="description"
+              label="Description"
+              showMessage={false}
+              control={postEditorForm.control}
+              optional={postEditorFormSchema.shape.description.isNullable()}
+            />
+            <InputField
+              name="address"
+              label="Address"
+              type="text"
+              showMessage={false}
+              optional={postEditorFormSchema.shape.address.isNullable()}
+              control={postEditorForm.control}
+            />
+            <InputField
+              name="postcode"
+              label="Zip code"
+              type="number"
+              showMessage={false}
+              optional={postEditorFormSchema.shape.postcode.isNullable()}
+              control={postEditorForm.control}
+            />
+            <InputField
+              name="phone"
+              label="Phone"
+              type="phone"
+              showMessage={false}
+              optional={postEditorFormSchema.shape.phone.isNullable()}
+              control={postEditorForm.control}
+            />
+            <div className="flex gap-8 justify-between">
+              <InputField
+                className="w-full"
+                name="minAge"
+                type="number"
+                label="Min age"
+                showMessage={false}
+                control={postEditorForm.control}
+                optional={postEditorFormSchema.shape.minAge.isNullable()}
+              />
+              <InputField
+                className="w-full"
+                name="maxAge"
+                type="number"
+                label="Max age"
+                showMessage={false}
+                control={postEditorForm.control}
+                optional={postEditorFormSchema.shape.maxAge.isNullable()}
+              />
+            </div>
+            <SelectField
+              className="w-full"
+              name="category"
+              label="Category"
+              showMessage={false}
+              variants={POST_CATEGORIES.map((category) => ({
+                label: capitalizeFirstLetter(category.replaceAll("_", " ")),
+                value: category,
+              }))}
+              optional={postEditorFormSchema.shape.category.isNullable()}
+              control={postEditorForm.control}
+            />
+            <InputField
+              type="number"
+              name="price"
+              label="Price"
+              showMessage={false}
+              control={postEditorForm.control}
+              optional={postEditorFormSchema.shape.price.isNullable()}
+            />
+          </form>
+        </Form>
+        <FootBar
+          isEditing={isEditingPost}
+          onSubmitToDrafts={postEditorForm.handleSubmit(onDraftSubmit)}
+          onSubmitToPosts={postEditorForm.handleSubmit(onPostSubmit)}
+        />
       </DialogContent>
     </Dialog>
   );
 }
 
-function AgeBounds() {
-  return (
-    <div className="flex gap-8 justify-between">
-      <TextField
-        className="w-full"
-        type="number"
-        id="min-age"
-        label="Min age"
-      />
-      <TextField
-        className="w-full"
-        type="number"
-        id="max-age"
-        label="Max age"
-      />
-    </div>
-  );
-}
-
-function FootBar() {
+function FootBar({
+  isEditing,
+  onSubmitToDrafts,
+  onSubmitToPosts,
+}: {
+  isEditing: boolean;
+  onSubmitToDrafts: () => Promise<void>;
+  onSubmitToPosts: () => Promise<void>;
+}) {
   return (
     <div className="flex gap-2 justify-end">
-      <Button variant="ghost">To drafts</Button>
-      <Button>Add post</Button>
-    </div>
-  );
-}
-
-function UploadField({
-  id,
-  label,
-  optional = false,
-}: Readonly<{ id: string; label: string; optional?: boolean }>) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label className="ml-2 flex gap-1" htmlFor={id}>
-        {label}
-        {optional && <span className="text-2xs font-thin">(optional)</span>}
-      </Label>
-      <div className="flex gap-2">
-        <Input type="file" id={id} placeholder={label} />
-        <Button variant="outline">
-          <Trash2 />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function TextField({
-  id,
-  type,
-  label,
-  optional = false,
-  className,
-}: Readonly<{
-  id: string;
-  type: string;
-  label: string;
-  optional?: boolean;
-  className?: string;
-}>) {
-  const styles = twMerge("flex flex-col gap-2", className);
-
-  return (
-    <div className={styles}>
-      <Label className="ml-2 flex gap-1" htmlFor={id}>
-        {label}
-        {optional && <span className="text-2xs font-thin">(optional)</span>}
-      </Label>
-      <Input type={type} id={id} placeholder={label} />
-    </div>
-  );
-}
-
-function SelectField({
-  id,
-  label,
-  variants,
-  optional = false,
-}: Readonly<{
-  id: string;
-  label: string;
-  variants: Array<{ value: string; label: string }>;
-  optional?: boolean;
-}>) {
-  const Options = () =>
-    variants.map(({ value, label }) => (
-      <SelectItem key={value} value={value}>
-        {label}
-      </SelectItem>
-    ));
-
-  return (
-    <div className="flex flex-col gap-2">
-      <Label className="ml-2 flex gap-1" htmlFor={id}>
-        {label}
-        {optional && <span className="text-2xs font-thin">(optional)</span>}
-      </Label>
-      <Select>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={label} />
-        </SelectTrigger>
-        <SelectContent>
-          <Options />
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-function TextareaField({
-  id,
-  label,
-  optional = false,
-}: Readonly<{ id: string; label: string; optional?: boolean }>) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label className="ml-2 flex gap-1" htmlFor={id}>
-        {label}
-        {optional && <span className="text-2xs font-thin">(optional)</span>}
-      </Label>
-      <Textarea id="description" placeholder={label}></Textarea>
+      {isEditing ? (
+        <PendingButton onClick={onSubmitToPosts} text="Update" />
+      ) : (
+        <>
+          <PendingButton
+            variant="ghost"
+            onClick={onSubmitToDrafts}
+            text="To drafts"
+          />
+          <PendingButton onClick={onSubmitToPosts} text="Add post" />
+        </>
+      )}
     </div>
   );
 }

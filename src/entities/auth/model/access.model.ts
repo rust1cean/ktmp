@@ -5,7 +5,7 @@ import {
   resendOtp,
   requestToChangePasswordByEmail,
   updatePassword,
-} from "@/shared/api/supabase/auth";
+} from "@/shared/data/auth/api";
 import { sessionCreated } from "@/entities/auth/store";
 
 export const confirmEmailFx = createEffect(

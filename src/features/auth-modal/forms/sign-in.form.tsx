@@ -1,11 +1,11 @@
 "use client";
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { PendingButton } from "@/shared/shadcn-ui/button";
-import { Form } from "@/shared/shadcn-ui/form";
+import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
+import { Form } from "@/shared/shadcn/shadcn-ui/form";
 import {
   EmailField,
   PasswordField,
@@ -37,8 +37,8 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
         onSubmit={(e) => e.preventDefault()}
       >
         <div className="flex flex-col gap-2">
-          <EmailField />
-          <PasswordField />
+          <EmailField showMessage={false} />
+          <PasswordField showMessage={false} />
         </div>
         <PendingButton
           className="text-white bg-blue-500/70 hover:bg-blue-500/80"

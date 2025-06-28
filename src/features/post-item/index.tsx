@@ -1,63 +1,95 @@
 "use client";
 
-// import Image from "next/image";
+import Image from "next/image";
+import { useState } from "react";
 
-import { Loader } from "@/shared/shadcn-ui/loader";
-import { PostBadges, AuthorPostButtons, UserPostButtons } from "./components";
+import { Loader } from "@/shared/shadcn/shadcn-ui/loader";
+import { PostBadges, PostButtons } from "./ui";
+import type { PostButtonVisibilityProps } from "./ui";
 import type { Post } from "@/entities/post";
+
+export type { PostButtonVisibilityProps } from "./ui";
 
 export type PostItemProps = {
   post: Post;
-  isAuthor: boolean;
+  isDraft: boolean;
+  getUserId: () => string | undefined;
   onOpenPostDetails: (post: Post) => void;
   onOpenPostEditor?: (post: Post) => void;
-  onFavorite: (postId: Post["id"]) => Promise<void>;
-  onDelete?: (postId: Post["id"]) => Promise<void>;
-};
+} & Partial<PostButtonVisibilityProps>;
 
-export function PostItem({
+export const PostItem = ({
   post,
-  isAuthor,
+  getUserId,
   onOpenPostDetails,
-  onFavorite,
   onOpenPostEditor,
-  onDelete,
-}: PostItemProps) {
-  const handleOpen = () => onOpenPostDetails(post);
-  const handleFavorite = () => onFavorite(post.id);
-  const handleEdit = () => onOpenPostEditor?.(post);
-  const handleDelete = () => onDelete!(post.id);
+  showFavoriteButton = true,
+  showEditButton = false,
+  showDeleteButton = false,
+  showToggleDraftButton = false,
+  isDraft,
+}: PostItemProps) => {
+  const handleOpenPostDetails = () => onOpenPostDetails(post);
+  const handleOpenPostEditor = () => onOpenPostEditor?.(post);
 
   return (
-    <div className="w-full flex flex-col px-2 pt-3 pb-3 gap-4 rounded-xl contain-paint bg-card">
-      <PostImage onOpenPostDetails={handleOpen} />
-      <div className="px-1 h-full flex flex-col gap-2">
-        <PostTitle text={post.title} />
-        <PostDescription text={post.description} />
-        <PostBadges {...post} />
-      </div>
-      <PostButtons
-        isAuthor={isAuthor}
-        onFavorite={handleFavorite}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+    <div className="w-full flex flex-col gap-4 rounded-xl contain-paint bg-card">
+      <PostImage
+        url={post.imageUrl}
+        onOpenPostDetails={handleOpenPostDetails}
       />
+      <div className="h-full flex flex-col gap-4 px-2 pb-3">
+        <div className="px-1 h-full flex flex-col gap-2">
+          <PostTitle text={post.title} />
+          <PostDescription text={post.description} />
+          <PostBadges {...post} />
+        </div>
+        <PostButtons
+          getUserId={getUserId}
+          post={post}
+          isDraft={isDraft}
+          onEdit={handleOpenPostEditor}
+          showFavoriteButton={showFavoriteButton}
+          showEditButton={showEditButton}
+          showDeleteButton={showDeleteButton}
+          showToggleDraftButton={showToggleDraftButton}
+        />
+      </div>
     </div>
   );
-}
+};
 
-function PostImage({ onOpenPostDetails }: { onOpenPostDetails: () => void }) {
+function PostImage({
+  url,
+  onOpenPostDetails,
+}: {
+  url: string | null;
+  onOpenPostDetails: () => void;
+}) {
+  const [isLoading, setLoading] = useState(true);
+
+  const Content = () =>
+    url && (
+      <>
+        {isLoading && <Loader className="absolute t-0 l-0" />}
+        <Image
+          className="size-full object-cover select-none"
+          src={url}
+          alt="Image not found"
+          width={360}
+          height={240}
+          onLoad={() => setLoading(false)}
+          onError={() => setLoading(false)}
+        />
+      </>
+    );
+
   return (
     <button
-      className="w-full min-h-[25vh] md:min-h-[16vh] flex items-center justify-center rounded-xl bg-background/20"
+      className="relative hover:brightness-90 cursor-zoom-in w-full min-h-[25vh] md:min-h-[16vh] max-h-[25vh] md:max-h-[16vh] flex items-center justify-center rounded-xl bg-background/20"
       onClick={onOpenPostDetails}
     >
-      <Loader />
-      {/* <Image
-  src={"https://github.com/shadcn.png"}
-  alt={"Post image"}
-  fill={true}
-/> */}
+      <Content />
     </button>
   );
 }
@@ -68,28 +100,4 @@ function PostTitle({ text }: { text: string }) {
 
 function PostDescription({ text }: { text: string }) {
   return <span className="text-sm line-clamp-3">{text}</span>;
-}
-
-function PostButtons({
-  isAuthor,
-  onFavorite,
-  onEdit,
-  onDelete,
-}: {
-  isAuthor: boolean;
-  onFavorite: () => Promise<void>;
-  onEdit?: () => void;
-  onDelete?: () => Promise<void>;
-}) {
-  if (isAuthor && onEdit && onDelete) {
-    return (
-      <AuthorPostButtons
-        onFavorite={onFavorite}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
-    );
-  }
-
-  return <UserPostButtons onFavorite={onFavorite} />;
 }

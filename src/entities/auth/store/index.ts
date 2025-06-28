@@ -2,6 +2,7 @@ export {
   sessionCreated,
   sessionDropped,
   $session,
+  $myId,
   $isSignedIn,
   $isSignedOut,
 } from "./session.store";

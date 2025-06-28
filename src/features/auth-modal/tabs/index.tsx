@@ -2,10 +2,13 @@ import { createEvent, createStore } from "effector";
 import { useUnit } from "effector-react";
 import { Undo2 } from "lucide-react";
 
-import { Button } from "@/shared/shadcn-ui/button";
-import { Card, CardHeader, CardContent } from "@/shared/shadcn-ui/card";
+import { Button } from "@/shared/shadcn/shadcn-ui/button";
+import { Card, CardHeader, CardContent } from "@/shared/shadcn/shadcn-ui/card";
 import { TabsContent } from "@radix-ui/react-tabs";
-import { DialogDescription, DialogTitle } from "@/shared/shadcn-ui/dialog";
+import {
+  DialogDescription,
+  DialogTitle,
+} from "@/shared/shadcn/shadcn-ui/dialog";
 
 export { SignInTab } from "./sign-in.tab";
 export { SignUpTab } from "./sign-up.tab";

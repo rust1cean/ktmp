@@ -14,7 +14,7 @@ import {
   type OAuthProvider,
   type AuthEventSubscriber,
   type SubscribedAuthEvents,
-} from "@/shared/api/supabase/auth";
+} from "@/shared/data/auth/api";
 
 export const loadSessionFx = createEffect(async () => {
   const { error } = await getSession();

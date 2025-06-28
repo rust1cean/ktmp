@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
-import { FormField } from "@/shared/shadcn-ui/form-field";
-import { Input } from "@/shared/shadcn-ui/input";
+import { FormField } from "@/shared/shadcn/shadcn-ui/form-field";
+import { Input } from "@/shared/shadcn/shadcn-ui/input";
 
 export const MIN_PASSWORD_LENGTH: number = 8;
 
@@ -15,14 +15,17 @@ export const passwordFieldSchema = z
 export function PasswordField({
   name = "password",
   label,
+  showMessage = true,
 }: {
   name?: string;
   label?: string;
+  showMessage?: boolean;
 }) {
   return (
     <FormField
       name={name}
       label={label}
+      showMessage={showMessage}
       render={({ field }) => (
         <Input
           type="password"

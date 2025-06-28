@@ -8,8 +8,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/shared/shadcn-ui/dropdown-menu";
-import { Button } from "@/shared/shadcn-ui/button";
+} from "@/shared/shadcn/shadcn-ui/dropdown-menu";
+import { Button } from "@/shared/shadcn/shadcn-ui/button";
 
 export function ModeSwitcher() {
   const { setTheme } = useTheme();

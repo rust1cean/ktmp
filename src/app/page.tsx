@@ -1,20 +1,15 @@
 "use client";
 
-import { useUnit } from "effector-react";
-
 import { PostFeed } from "@/widgets/post-feed";
 import { openPostDetailsModal } from "@/widgets/post-details-modal";
-import { $recentlyPosts } from "@/entities/post/store/posts.store";
-import { getPostsFx } from "@/entities/post/model";
+import { $generalPosts, getGeneralPostsFx } from "@/entities/post";
 
-export default function Home() {
-  const posts = useUnit($recentlyPosts);
-
+export default function HomePage() {
   return (
     <PostFeed
-      title="Recently posts"
-      posts={posts}
-      onRequestPosts={getPostsFx}
+      title="Active posts"
+      $posts={$generalPosts}
+      onRequestPosts={getGeneralPostsFx}
       onOpenPostDetails={openPostDetailsModal}
     />
   );

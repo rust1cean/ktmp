@@ -2,8 +2,8 @@
 
 import { useUnit } from "effector-react";
 
-import { Dialog, DialogContent } from "@/shared/shadcn-ui/dialog";
-import { Tabs } from "@/shared/shadcn-ui/tabs";
+import { Dialog, DialogContent } from "@/shared/shadcn/shadcn-ui/dialog";
+import { Tabs } from "@/shared/shadcn/shadcn-ui/tabs";
 import {
   $currentTab,
   $isAuthModalOpened,

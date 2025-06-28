@@ -1,12 +1,12 @@
 "use client";
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 
-import { PendingButton } from "@/shared/shadcn-ui/button";
-import { Form } from "@/shared/shadcn-ui/form";
+import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
+import { Form } from "@/shared/shadcn/shadcn-ui/form";
 import { OtpCodeField, otpCodeFieldSchema } from "@/features/auth-modal/fields";
 
 export const otpFormSchema = z.object({

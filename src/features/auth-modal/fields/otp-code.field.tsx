@@ -1,12 +1,12 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
-import { FormField } from "@/shared/shadcn-ui/form-field";
+import { FormField } from "@/shared/shadcn/shadcn-ui/form-field";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/shared/shadcn-ui/input-otp";
-import { FormControl, FormItem } from "@/shared/shadcn-ui/form";
+} from "@/shared/shadcn/shadcn-ui/input-otp";
+import { FormControl, FormItem } from "@/shared/shadcn/shadcn-ui/form";
 
 export const OTP_CODE_LENGTH: number = 6;
 export const otpCodeFieldSchema = z

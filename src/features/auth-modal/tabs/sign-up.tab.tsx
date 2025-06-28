@@ -1,7 +1,7 @@
 import { useUnit } from "effector-react";
 
-import { Separator } from "@/shared/shadcn-ui/separator";
-import { Button } from "@/shared/shadcn-ui/button";
+import { Separator } from "@/shared/shadcn/shadcn-ui/separator";
+import { Button } from "@/shared/shadcn/shadcn-ui/button";
 import { SignUpForm, type SignUpFormData } from "@/features/auth-modal/forms";
 import { OAuthProviders } from "@/features/auth-modal/tabs/oauth-providers";
 import { signUpFx } from "@/entities/auth";

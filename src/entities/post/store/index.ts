@@ -1,26 +1,26 @@
-import { createStore } from "effector";
+export {
+  generalPostsFetched,
+  searchPostsFetched,
+  searchPostsCleared,
+  favoritePostsFetched,
+  postFavorited,
+  postUnfavorited,
+  favoritePostsCleared,
+  userPostsFetched,
+  postCreated,
+  postUpdated,
+  postDeleted,
+  userPostsCleared,
+  userDraftsFetched,
+  draftCreated,
+  draftDeleted,
+  userDraftsCleared,
+  postMarkedAsDraft,
+  postUnmarkedAsDraft,
+} from "./events";
 
-export { $recentlyPosts, postsFetched } from "./posts.store";
-export { createDraftsStore } from "./drafts.store";
-export { createActivePostsStore } from "./active-posts.store";
-
-export const createStoreTemplate = <T extends { id: unknown }>() => {
-  const $items = createStore<T[]>([]);
-
-  const create = (items: T[], newItem: T) => [...items, newItem];
-  const update = (items: T[], updatedItem: T) =>
-    items.map((item) => {
-      return item.id === updatedItem.id ? updatedItem : item;
-    });
-  const remove = (items: T[], deletedItemId: T["id"]) =>
-    items.filter((item) => {
-      return item.id !== deletedItemId;
-    });
-
-  return {
-    $items,
-    create,
-    update,
-    remove,
-  };
-};
+export { $generalPosts } from "./general-posts.store";
+export { $favoritePosts } from "./favorite-posts.store";
+export { $userPosts } from "./user-posts.store";
+export { $userDrafts } from "./user-drafts.store";
+export { $searchPosts } from "./search-posts.store";

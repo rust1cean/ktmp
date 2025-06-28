@@ -1,13 +1,13 @@
 import { FaApple } from "react-icons/fa";
 
-import { PendingButton } from "@/shared/shadcn-ui/button";
+import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
 
 export function AppleOAuth() {
   return (
     <PendingButton
       variant="secondary"
       icon={<FaApple />}
-      onClick={console.log}
+      onClick={async () => {}}
     />
   );
 }
