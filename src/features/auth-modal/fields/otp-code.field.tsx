@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { FormField } from "@/shared/shadcn/shadcn-ui/form-field";
 import {
