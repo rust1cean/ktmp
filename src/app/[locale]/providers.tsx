@@ -6,7 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { $myId, SessionProvider } from "@/entities/auth";
 import { ProfileProvider } from "@/entities/profile";
 
-export function ClientProviders({
+export default function ClientProviders({
   children,
   locale,
   messages,
