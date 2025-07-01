@@ -17,12 +17,16 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuPortal,
   DropdownMenuSubContent,
+  DropdownMenuSeparator,
 } from "@/shared/shadcn/shadcn-ui/dropdown-menu";
-import { POST_CATEGORIES } from "@/shared/data/post/api";
-import { capitalizeFirstLetter } from "@/shared/format-string";
+import { POST_CATEGORIES, type PostCategory } from "@/shared/data/post/api";
+import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export const searchBarFormSchema = z.object({
   query: z.string().min(3),
+  category: z.enum(POST_CATEGORIES).optional(),
+  ageFrom: z.number().optional(),
 });
 
 export type SearchBarFilters = z.infer<typeof searchBarFormSchema>;
@@ -38,10 +42,29 @@ export function SearchBar({
   searchFilters,
   className,
 }: SearchBarProps) {
+  const t = useTranslations("Base");
   const searchBarForm = useForm<SearchBarFilters>({
     resolver: zodResolver(searchBarFormSchema),
-    defaultValues: { query: searchFilters?.query ?? "" },
   });
+
+  useEffect(() => {
+    if (searchFilters?.query != null)
+      searchBarForm.setValue("query", searchFilters.query);
+
+    if (searchFilters?.ageFrom != null)
+      searchBarForm.setValue("ageFrom", searchFilters.ageFrom);
+
+    if (searchFilters?.category != null)
+      searchBarForm.setValue("category", searchFilters.category);
+  }, [
+    searchBarForm,
+    searchFilters?.ageFrom,
+    searchFilters?.category,
+    searchFilters?.query,
+  ]);
+
+  const ageFrom = searchBarForm.watch("ageFrom");
+  const category = searchBarForm.watch("category");
 
   return (
     <Form {...searchBarForm}>
@@ -52,9 +75,30 @@ export function SearchBar({
         <DropdownMenu>
           <FiltersTrigger />
           <DropdownMenuContent align="start">
-            <SortBy />
-            <SelectAge />
-            <SelectCategory />
+            <DropdownMenuItem onClick={() => searchBarForm.reset()}>
+              {t("reset")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <SelectAge
+              placeholder={
+                ageFrom != null ? `${t("age_from")}: ${ageFrom}` : null
+              }
+              onSelect={(ageFrom) => {
+                searchBarForm.setValue("ageFrom", ageFrom, {
+                  shouldDirty: true,
+                });
+              }}
+            />
+            <SelectCategory
+              placeholder={
+                category && `${t("category")}: ${category.replaceAll("_", " ")}`
+              }
+              onSelect={(category) =>
+                searchBarForm.setValue("category", category, {
+                  shouldDirty: true,
+                })
+              }
+            />
           </DropdownMenuContent>
         </DropdownMenu>
         <FormField
@@ -65,8 +109,8 @@ export function SearchBar({
             <Input
               className="text-center bg-background"
               type="text"
-              aria-label="Search"
-              placeholder="Search"
+              aria-label={t("search")}
+              placeholder={t("search")}
               value={field.value ?? ""}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -82,7 +126,7 @@ export function SearchBar({
   );
 }
 
-function FiltersTrigger() {
+const FiltersTrigger = () => {
   return (
     <DropdownMenuTrigger asChild>
       <Button variant="outline">
@@ -90,48 +134,70 @@ function FiltersTrigger() {
       </Button>
     </DropdownMenuTrigger>
   );
-}
+};
 
-function SortBy() {
+function SelectAge({
+  placeholder,
+  onSelect,
+}: {
+  placeholder?: string | number | null;
+  onSelect: (ageFrom: number) => void;
+}) {
+  const t = useTranslations("Base");
+
+  const ageFromVariants = [
+    { label: `${t("from")} 3`, value: "3" },
+    { label: `${t("from")} 6`, value: "6" },
+    { label: `${t("from")} 12`, value: "12" },
+    { label: `${t("from")} 14`, value: "14" },
+  ];
+
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger>Sort By</DropdownMenuSubTrigger>
+      <DropdownMenuSubTrigger>
+        {placeholder ?? t("select_age")}
+      </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          <DropdownMenuItem>Date added</DropdownMenuItem>
-          <DropdownMenuItem>Rating</DropdownMenuItem>
+          {ageFromVariants.map(({ label, value }) => (
+            <DropdownMenuItem
+              key={value}
+              onSelect={() => onSelect(Number(value))}
+            >
+              {label}
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
   );
 }
 
-function SelectAge() {
-  return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>Select age</DropdownMenuSubTrigger>
-      <DropdownMenuPortal>
-        <DropdownMenuSubContent>
-          <DropdownMenuItem>0-6</DropdownMenuItem>
-          <DropdownMenuItem>7-14</DropdownMenuItem>
-          <DropdownMenuItem>14-18</DropdownMenuItem>
-        </DropdownMenuSubContent>
-      </DropdownMenuPortal>
-    </DropdownMenuSub>
-  );
-}
+function SelectCategory({
+  placeholder,
+  onSelect,
+}: {
+  placeholder?: string | number | null;
+  onSelect: (category: PostCategory) => void;
+}) {
+  const t = useTranslations("Base");
+  const c = useTranslations("PostCategories");
 
-function SelectCategory() {
   const Categories = () =>
-    POST_CATEGORIES.map((category) => (
-      <DropdownMenuItem key={category}>
-        {capitalizeFirstLetter(category.replaceAll("_", " "))}
-      </DropdownMenuItem>
-    ));
+    POST_CATEGORIES.map(
+      (category) =>
+        category !== "none" && (
+          <DropdownMenuItem key={category} onSelect={() => onSelect(category)}>
+            {c(category)}
+          </DropdownMenuItem>
+        )
+    );
 
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger>Categories</DropdownMenuSubTrigger>
+      <DropdownMenuSubTrigger>
+        {placeholder ?? t("category")}
+      </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           <Categories />

@@ -2,6 +2,7 @@ import { Book, BookDashed } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 
 import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
+import { useTranslations } from "next-intl";
 
 export type ToggleDraftButtonProps = React.ComponentProps<"button"> & {
   isDraft: boolean;
@@ -15,6 +16,8 @@ export function ToggleDraftButton({
   onToPosts,
   ...props
 }: ToggleDraftButtonProps) {
+  const t = useTranslations("Base");
+
   const toPostsStyles =
     "border-none text-yellow-500 dark:text-yellow-400 bg-yellow-500/10 dark:bg-yellow-400/10 hover:bg-yellow-500/20 dark:hover:bg-yellow-400/20";
 
@@ -28,7 +31,7 @@ export function ToggleDraftButton({
         props.className,
         isDraft ? toPostsStyles : toDraftsStyles
       )}
-      text={isDraft ? "To posts" : "To drafts"}
+      text={isDraft ? t("to_posts") : t("to_drafts")}
       icon={isDraft ? <Book /> : <BookDashed />}
       onClick={() => (isDraft ? onToPosts() : onToDrafts())}
     />

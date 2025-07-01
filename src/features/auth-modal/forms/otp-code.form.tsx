@@ -3,11 +3,12 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
 import { Form } from "@/shared/shadcn/shadcn-ui/form";
 import { OtpCodeField, otpCodeFieldSchema } from "@/features/auth-modal/fields";
+import { useTranslations } from "next-intl";
 
 export const otpFormSchema = z.object({
   otpCode: otpCodeFieldSchema,
@@ -21,6 +22,8 @@ export type OtpCodeFormProps = {
 };
 
 export function OtpCodeForm({ onSubmit, onResend }: OtpCodeFormProps) {
+  const t = useTranslations("Base");
+
   const otpCodeForm = useForm<OtpCodeFormData>({
     resolver: zodResolver(otpFormSchema),
     defaultValues: { otpCode: "" },
@@ -36,7 +39,7 @@ export function OtpCodeForm({ onSubmit, onResend }: OtpCodeFormProps) {
         <div className="flex flex-col gap-2">
           <PendingButton
             type="submit"
-            text="Confirm"
+            text={t("confirm")}
             onClick={otpCodeForm.handleSubmit(onSubmit)}
           />
           <ResendButton onResend={onResend} />
@@ -47,7 +50,12 @@ export function OtpCodeForm({ onSubmit, onResend }: OtpCodeFormProps) {
 }
 
 function ResendButton({ onResend }: { onResend: () => Promise<void> }) {
-  const formatText = (secs: number) => `Until resend ${secs} second(s)`;
+  const t = useTranslations("Base");
+
+  const formatText = useCallback(
+    (secs: number) => t("until_resend", { secs }),
+    [t]
+  );
 
   const [isResendDisabled, setResendDisabled] = useState(false);
   const [remaining, setRemaining] = useState(60);
@@ -65,7 +73,7 @@ function ResendButton({ onResend }: { onResend: () => Promise<void> }) {
         } else {
           clearInterval(timerId);
           setResendDisabled(false);
-          setResendText("Resend OTP-code");
+          setResendText(t("resend_otp_code"));
 
           return 0;
         }
@@ -73,7 +81,7 @@ function ResendButton({ onResend }: { onResend: () => Promise<void> }) {
     }, 1000);
 
     return () => clearInterval(timerId);
-  }, []);
+  }, [formatText, t]);
 
   const handleClick = async () => {
     await onResend().then(() => setVisible(false));

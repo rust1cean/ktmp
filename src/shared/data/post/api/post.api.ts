@@ -27,8 +27,7 @@ const formatPost = (post: PostDetailed) => {
 export type Filters = {
   searchQuery?: string;
   categories?: PostCategory[];
-  minAge?: number;
-  maxAge?: number;
+  ageFrom?: number;
   onlyDrafts?: boolean;
   onlyFavorites?: boolean;
   byIdentifiers?: Array<PostDetailed["id"]>;
@@ -41,8 +40,7 @@ export const fetchPosts = async ({
   filters: {
     searchQuery,
     categories,
-    minAge,
-    maxAge,
+    ageFrom,
     onlyDrafts = false,
     onlyFavorites = false,
     byIdentifiers = [],
@@ -56,12 +54,11 @@ export const fetchPosts = async ({
   const q = supabase.from("post_view").select();
 
   if (searchQuery) q.ilike("title", "%" + searchQuery + "%");
-  if (categories) q.in("category", categories);
-  if (minAge) q.gte("min_age", minAge);
-  if (maxAge) q.lte("max_age", maxAge);
+  if (categories != null) q.in("category", categories);
+  if (ageFrom != null) q.gte("max_age", ageFrom);
   if (onlyFavorites) q.eq("is_favorited", true);
   if (byIdentifiers.length > 0) q.in("id", byIdentifiers);
-  if (authorId) q.eq("author", authorId);
+  if (authorId != null) q.eq("author", authorId);
 
   if (limit > MAX_POSTS_PER_REQUEST) limit = MAX_POSTS_PER_REQUEST;
 

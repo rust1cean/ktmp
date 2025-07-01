@@ -47,7 +47,7 @@ export function Field<T extends FieldValues>({
       render={({ field }) => (
         <FormItem className={className}>
           {label && (
-            <FormLabel className="ml-2 flex gap-1" htmlFor={name}>
+            <FormLabel className="ml-2 flex" htmlFor={name}>
               {label}
               {optional && (
                 <span className="text-2xs font-thin">(optional)</span>

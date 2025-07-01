@@ -2,6 +2,7 @@ import { Heart } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 
 import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
+import { useTranslations } from "next-intl";
 
 export type FavoriteButtonProps = React.ComponentProps<"button"> & {
   isFavorite: boolean;
@@ -15,6 +16,8 @@ export function FavoriteButton({
   onUnfavorite,
   ...props
 }: FavoriteButtonProps) {
+  const t = useTranslations("Base");
+
   return (
     <PendingButton
       {...props}
@@ -22,7 +25,7 @@ export function FavoriteButton({
         props.className,
         "border-none text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 dark:bg-indigo-400/10 hover:bg-indigo-500/20 dark:hover:bg-indigo-400/20"
       )}
-      text={isFavorite ? "Unfavorite" : "Favorite"}
+      text={isFavorite ? t("unfavorite") : t("favorite")}
       icon={<Heart />}
       onClick={() => (isFavorite ? onUnfavorite() : onFavorite())}
     />

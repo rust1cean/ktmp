@@ -12,6 +12,7 @@ import {
   passwordFieldSchema,
 } from "@/features/auth-modal/fields";
 import { emailFieldSchema } from "@/features/auth-modal/fields";
+import { useTranslations } from "next-intl";
 
 export const signInFormSchema = z.object({
   email: emailFieldSchema,
@@ -25,6 +26,8 @@ export type SignInFormProps = {
 };
 
 export function SignInForm({ onSubmit }: SignInFormProps) {
+  const t = useTranslations("Base");
+
   const signInForm = useForm<SignInFormData>({
     resolver: zodResolver(signInFormSchema),
     defaultValues: { email: "", password: "" },
@@ -43,7 +46,7 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
         <PendingButton
           className="text-white bg-blue-500/70 hover:bg-blue-500/80"
           type="submit"
-          text="Sign in"
+          text={t("sign_in")}
           onClick={signInForm.handleSubmit(onSubmit)}
         />
       </form>

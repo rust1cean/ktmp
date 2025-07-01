@@ -25,3 +25,18 @@ export const becomeAuthor = async (profileId: string) => {
 
   return { error };
 };
+
+export const updateName = async ({
+  profileId,
+  name,
+}: {
+  profileId: string;
+  name: string;
+}) => {
+  const { error } = await supabase
+    .from("profile")
+    .update({ name })
+    .eq("id", profileId);
+
+  return { error };
+};

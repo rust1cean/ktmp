@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { FormField } from "@/shared/shadcn/shadcn-ui/form-field";
 import { Input } from "@/shared/shadcn/shadcn-ui/input";
+import { useTranslations } from "next-intl";
 
 export const MIN_PASSWORD_LENGTH: number = 8;
 
@@ -21,6 +22,8 @@ export function PasswordField({
   label?: string;
   showMessage?: boolean;
 }) {
+  const t = useTranslations("Base");
+
   return (
     <FormField
       name={name}
@@ -29,7 +32,7 @@ export function PasswordField({
       render={({ field }) => (
         <Input
           type="password"
-          placeholder="Password"
+          placeholder={t("password")}
           value={field.value ?? ""}
           onChange={field.onChange}
           onBlur={field.onBlur}

@@ -15,6 +15,7 @@ import {
   PasswordField,
   passwordFieldSchema,
 } from "@/features/auth-modal/fields";
+import { useTranslations } from "next-intl";
 
 export const signUpFormSchema = z.object({
   email: emailFieldSchema,
@@ -56,11 +57,13 @@ export function SignUpForm({ onSubmit }: SignUpFormProps) {
 }
 
 function Terms({ onChange }: { onChange: (isChecked: boolean) => void }) {
+  const t = useTranslations("Base");
+
   return (
     <div className="mx-auto flex items-center gap-2">
       <Checkbox id="terms" onCheckedChange={onChange} />
       <Link href="/terms" target="_blank" className="leading-none text-sm">
-        Accept terms and conditions
+        {t("accept_terms_and_conditions")}
       </Link>
     </div>
   );
@@ -73,10 +76,12 @@ function SignUpButton({
   onSubmit: () => Promise<void>;
   isDisabled: boolean;
 }) {
+  const t = useTranslations("Base");
+
   return (
     <PendingButton
       className="text-white bg-green-500/70 hover:bg-green-500/80"
-      text="Sign up"
+      text={t("sign_up")}
       onClick={onSubmit}
       disabled={isDisabled}
     />

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useUnit } from "effector-react";
 import { HeartIcon } from "lucide-react";
 
@@ -17,6 +17,7 @@ import { ModeSwitcher } from "@/widgets/header/components/mode-switcher";
 import { Menu } from "@/widgets/header/components/menu";
 import { searchPostsCleared } from "@/entities/post/store";
 import { $myProfile } from "@/entities/profile/store";
+import type { PostCategory } from "@/shared/data/post/api";
 
 export type HeaderProps = {
   onNotifyUser: (msg: string) => void;
@@ -35,12 +36,27 @@ export function Header({ onNotifyUser }: HeaderProps) {
 export function HeaderMobile({ onNotifyUser }: HeaderProps) {
   let { query } = useParams<{ query: string | undefined }>();
   query = query ? decodeURIComponent(query) : "";
+
+  const sp = useSearchParams();
+  const ageFrom = sp.get("age_from");
+  const category = sp.get("category");
+
   const router = useRouter();
   const profile = useUnit($myProfile);
 
-  const handleSubmit = async ({ query }: SearchBarFilters) => {
+  const handleSubmit = async ({
+    query,
+    ageFrom,
+    category,
+  }: SearchBarFilters) => {
     searchPostsCleared();
-    router.push(`/search/${query}`);
+
+    const params = new URLSearchParams();
+
+    if (ageFrom != null) params.set("age_from", ageFrom.toString());
+    if (category != null) params.set("category", category.toString());
+
+    router.push(`/search/${query}?${params.toString()}`);
   };
 
   return (
@@ -53,7 +69,16 @@ export function HeaderMobile({ onNotifyUser }: HeaderProps) {
           <Menu profile={profile} onNotifyUser={onNotifyUser} />
         </nav>
       </div>
-      <SearchBar onSubmit={handleSubmit} searchFilters={{ query }} />
+      <SearchBar
+        onSubmit={handleSubmit}
+        searchFilters={{
+          query,
+          ageFrom: ageFrom ? Number(decodeURIComponent(ageFrom)) : undefined,
+          category: category
+            ? (decodeURIComponent(category) as PostCategory)
+            : undefined,
+        }}
+      />
       <AuthModal onNotifyUser={onNotifyUser} />
     </header>
   );
@@ -62,18 +87,42 @@ export function HeaderMobile({ onNotifyUser }: HeaderProps) {
 export function HeaderDesktop({ onNotifyUser }: HeaderProps) {
   let { query } = useParams<{ query: string | undefined }>();
   query = query ? decodeURIComponent(query) : "";
+
+  const sp = useSearchParams();
+  const ageFrom = sp.get("age_from");
+  const category = sp.get("category");
+
   const router = useRouter();
   const profile = useUnit($myProfile);
 
-  const handleSubmit = async ({ query }: SearchBarFilters) => {
+  const handleSubmit = async ({
+    query,
+    ageFrom,
+    category,
+  }: SearchBarFilters) => {
     searchPostsCleared();
-    router.push(`/search/${query}`);
+
+    const params = new URLSearchParams();
+
+    if (ageFrom != null) params.set("age_from", ageFrom.toString());
+    if (category != null) params.set("category", category.toString());
+
+    router.push(`/search/${query}?${params.toString()}`);
   };
 
   return (
     <header className="sticky top-0 z-50 px-[3vw] lg:px-[10vw] 2xl:px-[25vw] w-full h-16 grid grid-cols-3 items-center border-b backdrop-blur-lg bg-muted/80">
       <Logo />
-      <SearchBar onSubmit={handleSubmit} searchFilters={{ query }} />
+      <SearchBar
+        onSubmit={handleSubmit}
+        searchFilters={{
+          query,
+          ageFrom: ageFrom ? Number(decodeURIComponent(ageFrom)) : undefined,
+          category: category
+            ? (decodeURIComponent(category) as PostCategory)
+            : undefined,
+        }}
+      />
       <nav className="flex items-center justify-end gap-2">
         <ModeSwitcher />
         <Favorites />

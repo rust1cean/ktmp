@@ -4,6 +4,7 @@ import { SignInForm, type SignInFormData } from "@/features/auth-modal/forms";
 import { OAuthProviders } from "@/features/auth-modal/tabs/oauth-providers";
 import { signInFx } from "@/entities/auth";
 import { Tab } from "@/features/auth-modal/tabs";
+import { useTranslations } from "next-intl";
 
 export type SignInTabProps = {
   onSuccess: (msg: string) => void;
@@ -18,29 +19,31 @@ export function SignInTab({
   onForgotPassword,
   onCreateAccount,
 }: SignInTabProps) {
+  const t = useTranslations("Base");
+
   const handleSignIn = async (credentials: SignInFormData) => {
     const { error } = await signInFx(credentials);
 
     if (error) onFail(error.message);
-    else onSuccess("Authorization was successful");
+    else onSuccess(t("authentication_successful"));
   };
 
   return (
     <Tab
       name="signIn"
-      title="Authentication"
-      description="Lorem Ipsum is simply dummy text of the printing and typesetting industry"
+      title={t("authentication_title")}
+      description={t("authentication_description")}
     >
       <SignInForm onSubmit={handleSignIn} />
       <div className="flex justify-between">
         <OAuthProviders />
         <Button variant="ghost" onClick={onForgotPassword}>
-          Forgot password
+          {t("forgot_password")}
         </Button>
       </div>
       <Separator />
       <Button variant="secondary" onClick={onCreateAccount}>
-        Sign up
+        {t("sign_up")}
       </Button>
     </Tab>
   );

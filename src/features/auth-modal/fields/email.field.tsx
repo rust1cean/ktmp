@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { FormField } from "@/shared/shadcn/shadcn-ui/form-field";
 import { Input } from "@/shared/shadcn/shadcn-ui/input";
+import { useTranslations } from "next-intl";
 
 export const emailFieldSchema = z
   .string()
@@ -15,6 +16,8 @@ export function EmailField({
   label?: string;
   showMessage?: boolean;
 }) {
+  const t = useTranslations("Base");
+
   return (
     <FormField
       name="email"
@@ -23,7 +26,7 @@ export function EmailField({
       render={({ field }) => (
         <Input
           type="email"
-          placeholder="E-mail"
+          placeholder={t("email")}
           value={field.value ?? ""}
           onChange={field.onChange}
           onBlur={field.onBlur}

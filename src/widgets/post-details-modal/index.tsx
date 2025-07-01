@@ -33,6 +33,7 @@ import {
 import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
 import { $myId } from "@/entities/auth";
 import { postFavorited, postUnfavorited } from "@/entities/post/store";
+import { useTranslations } from "next-intl";
 
 export const openPostDetailsModal = createEvent<Post>();
 export const closePostDetailsModal = createEvent();
@@ -100,6 +101,8 @@ function PostDetails({
   post?: Post | null;
   onCloseModal: () => void;
 }) {
+  const t = useTranslations("Base");
+
   if (!post) return;
 
   const onFavoritePost = async () => {
@@ -132,10 +135,29 @@ function PostDetails({
     );
   };
 
+  const formatAge = ({
+    minAge,
+    maxAge,
+  }: {
+    minAge?: string | number;
+    maxAge?: string | number;
+  }) => {
+    if (minAge != null && maxAge != null)
+      return { label: t("age"), text: `${minAge}-${maxAge}` };
+
+    if (minAge != null && maxAge == null)
+      return { label: t("from"), text: `${minAge}` };
+
+    if (minAge == null && maxAge != null)
+      return { label: t("to"), text: `${maxAge}` };
+
+    return "";
+  };
+
   const Badges = () => (
     <div className="flex flex-col gap-1">
       <Badge
-        label="Category"
+        label={t("category")}
         text={post.category}
         icon={Box}
         iconColor="text-sky-600"
@@ -146,25 +168,25 @@ function PostDetails({
         icon={UsersRound}
       />
       <Badge
-        label="Phone"
+        label={t("Phone")}
         text={post.phone}
         icon={Phone}
         iconColor="text-green-600"
       />
       <Badge
-        label="Address"
+        label={t("address")}
         text={post.address}
         icon={MapPin}
         iconColor="text-red-600"
       />
       <Badge
-        label="Zip code"
+        label={t("zip_code")}
         text={post.postcode}
         icon={Mailbox}
         iconColor="text-blue-600"
       />
       <Badge
-        label="Updated at"
+        label={t("updated_at")}
         text={post.updatedAt.toLocaleDateString()}
         icon={Calendar}
         iconColor="text-slate-600"
@@ -175,7 +197,7 @@ function PostDetails({
   const Price = () =>
     post.price != null && (
       <span className="w-full p-2 leading-none border font-semibold border-foreground text-center rounded-sm">
-        {post.price === 0 ? "Free" : `€${post.price}`}
+        {post.price === 0 ? t("free") : `€${post.price}`}
       </span>
     );
 
@@ -188,7 +210,7 @@ function PostDetails({
         <PendingButton
           className="text-white bg-indigo-500 hover:bg-indigo-600"
           icon={<Heart strokeWidth={3} />}
-          text={post.isFavorite ? "Unfavorite" : "Favorite"}
+          text={post.isFavorite ? t("unfavorite") : t("favorite")}
           onClick={() =>
             post.isFavorite ? onUnfavoritePost() : onFavoritePost()
           }
@@ -220,22 +242,3 @@ function Badge({
     );
   }
 }
-
-const formatAge = ({
-  minAge,
-  maxAge,
-}: {
-  minAge?: string | number;
-  maxAge?: string | number;
-}) => {
-  if (minAge != null && maxAge != null)
-    return { label: "Age", text: `${minAge}-${maxAge}` };
-
-  if (minAge != null && maxAge == null)
-    return { label: "From", text: `${minAge}` };
-
-  if (minAge == null && maxAge != null)
-    return { label: "To", text: `${maxAge}` };
-
-  return "";
-};

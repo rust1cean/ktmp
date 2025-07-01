@@ -4,6 +4,7 @@ import { MapPin, Phone, UsersRound, Box, Mailbox } from "lucide-react";
 
 import { capitalizeFirstLetter } from "@/shared/format-string";
 import { Badge } from "@/shared/shadcn/shadcn-ui/badge";
+import { useTranslations } from "next-intl";
 
 export type PostBadgesProps = {
   category?: string;
@@ -34,6 +35,7 @@ export function PostBadges({
 }
 
 export function AddressBadge({ address }: { address?: string }) {
+  const t = useTranslations("Base");
   if (address) {
     return (
       <Badge
@@ -41,20 +43,26 @@ export function AddressBadge({ address }: { address?: string }) {
         variant="outline"
       >
         <MapPin className="min-w-fit" />
-        <span className="truncate">Address: {address}</span>
+        <span className="truncate">
+          {t("address")}: {address}
+        </span>
       </Badge>
     );
   }
 }
 
 export function PhoneBadge({ phone }: { phone?: string }) {
+  const t = useTranslations("Base");
+
   return (
     <Badge
       className="max-w-full select-all border text-green-800/80 dark:text-green-400/80 border-green-800/30 dark:border-green-400/40"
       variant="outline"
     >
       <Phone className="min-w-fit" />
-      <span className="truncate">Phone: {phone}</span>
+      <span className="truncate">
+        {t("phone")}: {phone}
+      </span>
     </Badge>
   );
 }
@@ -68,11 +76,13 @@ export function AgeBoundariesBadge({
   minAge,
   maxAge,
 }: AgeBoundariesBadgeProps) {
+  const t = useTranslations("Base");
   if (minAge != null || maxAge != null) {
     const AgeBoundaries = () => {
-      if (minAge != null && maxAge != null) return `Age: ${minAge}-${maxAge}`;
-      if (minAge != null && maxAge == null) return `From ${minAge}`;
-      if (minAge == null && maxAge != null) return `To ${maxAge}`;
+      if (minAge != null && maxAge != null)
+        return `${t("age")}: ${minAge}-${maxAge}`;
+      if (minAge != null && maxAge == null) return `${t("from")} ${minAge}`;
+      if (minAge == null && maxAge != null) return `${t("to")} ${maxAge}`;
     };
 
     return (
@@ -90,6 +100,7 @@ export function AgeBoundariesBadge({
 }
 
 export function CategoryBadge({ category }: { category?: string }) {
+  const t = useTranslations("Base");
   if (category) {
     return (
       <Badge
@@ -98,7 +109,7 @@ export function CategoryBadge({ category }: { category?: string }) {
       >
         <Box className="min-w-fit" />
         <span className="truncate">
-          Category: {capitalizeFirstLetter(category)}
+          {t("category")}: {capitalizeFirstLetter(category)}
         </span>
       </Badge>
     );
@@ -106,6 +117,7 @@ export function CategoryBadge({ category }: { category?: string }) {
 }
 
 export function PostalCodeBadge({ postcode }: { postcode?: string | number }) {
+  const t = useTranslations("Base");
   if (postcode) {
     return (
       <Badge
@@ -113,7 +125,9 @@ export function PostalCodeBadge({ postcode }: { postcode?: string | number }) {
         variant="outline"
       >
         <Mailbox className="min-w-fit" />
-        <span className="truncate">Zip code: {postcode}</span>
+        <span className="truncate">
+          {t("zip_code")}: {postcode}
+        </span>
       </Badge>
     );
   }

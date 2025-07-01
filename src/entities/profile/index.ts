@@ -1,4 +1,4 @@
-export { getProfileFx, becomeAuthorFx } from "./model";
+export { getProfileFx, becomeAuthorFx, updateNameFx } from "./model";
 export { $myProfile, $isAuthor } from "./store";
 export { ProfileProvider } from "./provider";
 

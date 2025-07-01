@@ -2,12 +2,15 @@ import { Pencil } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 
 import { Button } from "@/shared/shadcn/shadcn-ui/button";
+import { useTranslations } from "next-intl";
 
 export type EditButtonProps = React.ComponentProps<"button"> & {
   onEdit: () => void;
 };
 
 export function EditButton({ onEdit, ...props }: EditButtonProps) {
+  const t = useTranslations("Base");
+
   return (
     <Button
       {...props}
@@ -18,7 +21,7 @@ export function EditButton({ onEdit, ...props }: EditButtonProps) {
       onClick={onEdit}
     >
       <Pencil />
-      Edit
+      {t("edit")}
     </Button>
   );
 }

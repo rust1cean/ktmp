@@ -38,6 +38,7 @@ import { postDtoToPostModel } from "./post.mapper";
 import { getFavoritesLocal } from "@/shared/data/post/local";
 import { $myProfile } from "@/entities/profile";
 import type { Post } from "../types";
+import type { Tables } from "@/shared/data/supabase";
 
 type GetPostsParams = {
   pagination: Pagination;
@@ -47,6 +48,8 @@ type GetPostsParams = {
   sortBy?: SortBy;
   searchQuery?: string;
   authorId?: string;
+  ageFrom?: string | null;
+  category?: PostCategory | null;
 };
 
 const getPostsFx = createEffect(
@@ -58,6 +61,8 @@ const getPostsFx = createEffect(
     byIdentifiers,
     searchQuery,
     authorId,
+    ageFrom,
+    category,
   }: GetPostsParams) => {
     const posts = await fetchPosts({
       pagination,
@@ -68,6 +73,8 @@ const getPostsFx = createEffect(
         searchQuery,
         byIdentifiers,
         onlyFavorites,
+        ageFrom: ageFrom ? Number(ageFrom) : undefined,
+        categories: category ? [category] : undefined,
       },
     });
 
@@ -86,8 +93,24 @@ const getPostsFx = createEffect(
 );
 
 export const searchPostsFx = createEffect(
-  async ({ searchQuery, offset }: { searchQuery: string; offset: number }) => {
-    const posts = await getPostsFx({ searchQuery, pagination: { offset } });
+  async ({
+    searchQuery,
+    offset,
+    ageFrom,
+    category,
+  }: {
+    searchQuery: string;
+    ageFrom?: string | null;
+    category?: PostCategory | null;
+    offset: number;
+  }) => {
+    const posts = await getPostsFx({
+      searchQuery,
+      ageFrom,
+      category,
+      pagination: { offset },
+    });
+
     searchPostsFetched(posts);
 
     return posts;
@@ -220,25 +243,7 @@ export const updateDraftFx = createEffect(
       const updatedPost = postDtoToPostModel({
         ...postDto,
         ...data,
-        author_name: author.name,
-        avatar_path: author.avatarUrl!,
-        author: author.id,
-        address: data?.address || null,
-        category: (data?.category || null) as PostCategory | null,
-        description: data?.description || null,
-        draft: data?.draft ?? null,
-        image_path: data?.image_path ?? null,
-        is_author: data?.is_author ?? null,
-        is_favorited: data?.is_favorited || false,
-        max_age: data?.max_age ?? null,
-        min_age: data?.min_age ?? null,
-        phone: data?.phone ?? null,
-        postcode: data?.postcode ?? null,
-        price: data?.price ?? null,
-        updated_at: null,
-        title: data?.title ?? null,
-        id: postId,
-      });
+      } as Tables<"post_view">);
       postUpdated({
         postId,
         updatedPost,
@@ -265,25 +270,7 @@ export const updatePostFx = createEffect(
       const updatedPost = postDtoToPostModel({
         ...postDto,
         ...data,
-        author_name: author.name,
-        avatar_path: author.avatarUrl!,
-        author: author.id,
-        address: data?.address || null,
-        category: (data?.category || null) as PostCategory | null,
-        description: data?.description || null,
-        draft: data?.draft ?? null,
-        image_path: data?.image_path ?? null,
-        is_author: data?.is_author ?? null,
-        is_favorited: data?.is_favorited || false,
-        max_age: data?.max_age ?? null,
-        min_age: data?.min_age ?? null,
-        phone: data?.phone ?? null,
-        postcode: data?.postcode ?? null,
-        price: data?.price ?? null,
-        updated_at: null,
-        title: data?.title ?? null,
-        id: postId,
-      });
+      } as Tables<"post_view">);
       postUpdated({
         postId,
         updatedPost,

@@ -1,24 +1,16 @@
-import { createEvent, createStore, sample } from "effector";
+import { createEvent, createStore } from "effector";
 
 import type { Profile, ProfileRole } from "../types";
 
 export const profileUpdated = createEvent<Profile | null>();
 export const roleUpdated = createEvent<ProfileRole>();
+export const nameUpdated = createEvent<string>();
 
-export const $myProfile = createStore<Profile | null>(null);
+export const $myProfile = createStore<Profile | null>(null)
+  .on(roleUpdated, (profile, role) => (profile ? { ...profile, role } : null))
+  .on(nameUpdated, (profile, name) => (profile ? { ...profile, name } : null))
+  .on(profileUpdated, (_, updatedProfile) => updatedProfile);
+
 export const $isAuthor = $myProfile.map(
   (profile) => profile?.role === "author"
 );
-
-sample({
-  clock: profileUpdated,
-  target: $myProfile,
-});
-
-sample({
-  clock: roleUpdated,
-  source: $myProfile,
-  fn: (source: Profile | null, clock: ProfileRole) =>
-    source ? { ...source, role: clock } : null,
-  target: $myProfile,
-});

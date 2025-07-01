@@ -10,6 +10,7 @@ import {
   PasswordField,
   passwordFieldSchema,
 } from "@/features/auth-modal/fields";
+import { useTranslations } from "next-intl";
 
 export const newPasswordSchema = z
   .object({
@@ -28,6 +29,8 @@ export type NewPasswordFormProps = {
 };
 
 export function NewPasswordForm({ onSubmit }: NewPasswordFormProps) {
+  const t = useTranslations("Base");
+
   const EmailForm = useForm<NewPasswordFormData>({
     resolver: zodResolver(newPasswordSchema),
     defaultValues: { password: "", confirmPassword: "" },
@@ -39,10 +42,13 @@ export function NewPasswordForm({ onSubmit }: NewPasswordFormProps) {
         className="flex flex-col gap-4"
         onSubmit={(e) => e.preventDefault()}
       >
-        <PasswordField name="password" label="New password" />
-        <PasswordField name="confirmPassword" label="Confirm new password" />
+        <PasswordField name="password" label={t("new_password")} />
+        <PasswordField
+          name="confirmPassword"
+          label={t("confirm_new_password")}
+        />
         <PendingButton
-          text="Set Password"
+          text={t("set_password")}
           onClick={EmailForm.handleSubmit(onSubmit)}
         />
       </form>

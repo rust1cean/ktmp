@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { PendingButton } from "@/shared/shadcn/shadcn-ui/button";
 import { Form } from "@/shared/shadcn/shadcn-ui/form";
 import { EmailField, emailFieldSchema } from "@/features/auth-modal/fields";
+import { useTranslations } from "next-intl";
 
 export const enterEmailSchema = z.object({
   email: emailFieldSchema,
@@ -19,6 +20,8 @@ export type EmailFormProps = {
 };
 
 export function EmailForm({ onSubmit }: EmailFormProps) {
+  const t = useTranslations("Base");
+
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(enterEmailSchema),
     defaultValues: { email: "" },
@@ -32,7 +35,7 @@ export function EmailForm({ onSubmit }: EmailFormProps) {
       >
         <EmailField />
         <PendingButton
-          text="Restore access"
+          text={t("restore_access")}
           onClick={emailForm.handleSubmit(onSubmit)}
         />
       </form>

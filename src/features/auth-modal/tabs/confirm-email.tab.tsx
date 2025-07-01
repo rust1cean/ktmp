@@ -1,6 +1,7 @@
 import { OtpCodeForm, type OtpCodeFormData } from "@/features/auth-modal/forms";
 import { confirmEmailFx, resendOtpFx } from "@/entities/auth";
 import { Tab } from "@/features/auth-modal/tabs";
+import { useTranslations } from "next-intl";
 
 export type ConfirmEmailTabProps = {
   email: string;
@@ -13,11 +14,13 @@ export function ConfirmEmailTab({
   onSuccess,
   onFail,
 }: ConfirmEmailTabProps) {
+  const t = useTranslations("Base");
+
   const handleSubmit = async ({ otpCode }: OtpCodeFormData) => {
     const { error } = await confirmEmailFx({ email, token: otpCode });
 
     if (error) onFail(error.message);
-    else onSuccess("E-mail confirmed");
+    else onSuccess(t("email_confirmed"));
   };
 
   const handleResend = async () => {
@@ -29,8 +32,8 @@ export function ConfirmEmailTab({
   return (
     <Tab
       name="confirmEmail"
-      title="Verify your e-mail"
-      description="We’ve sent a one-time code to your email. Please enter it below to verify your account"
+      title={t("verify_your_email")}
+      description={t("we_send_otp_code")}
     >
       <OtpCodeForm onSubmit={handleSubmit} onResend={handleResend} />
     </Tab>

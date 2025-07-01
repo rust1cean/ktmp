@@ -36,6 +36,7 @@ import {
   updatePostFx,
   type Post,
 } from "@/entities/post";
+import { useTranslations } from "next-intl";
 
 export const openPostCreator = createEvent();
 export const openPostEditor = createEvent<Post>();
@@ -98,6 +99,8 @@ export function EditPostModal({
 }: {
   getUserId: () => string | null | undefined;
 }) {
+  const t = useTranslations("Base");
+
   const [isVisible, onClose] = useUnit([$isPostEditorVisible, closePostEditor]);
   const [editablePost, isEditingPost] = useUnit([
     $editablePost,
@@ -182,8 +185,8 @@ export function EditPostModal({
         ? updateDraftFx({
             postId: editablePost.id,
             postDto,
-          }).then(() => toast("Draft updated successfully"))
-        : createDraftFx(postDto).then(() => toast("Draft added successfully"))
+          }).then(() => toast(t("draft_updated")))
+        : createDraftFx(postDto).then(() => toast(t("draft_added")))
       ).then(() => {
         onClose();
       });
@@ -231,8 +234,8 @@ export function EditPostModal({
         ? updatePostFx({
             postId: editablePost.id,
             postDto,
-          }).then(() => toast("Post updated successfully"))
-        : createPostFx(postDto).then(() => toast("Post added successfully"))
+          }).then(() => toast(t("post_updated")))
+        : createPostFx(postDto).then(() => toast(t("post_added")))
       ).then(() => {
         onClose();
       });
@@ -253,7 +256,7 @@ export function EditPostModal({
   return (
     <Dialog open={isVisible} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] flex flex-col gap-8">
-        <DialogTitle>Post editor</DialogTitle>
+        <DialogTitle>{t("post_editor_title")}</DialogTitle>
         <Form {...postEditorForm}>
           <form className="p-1 flex flex-col gap-4 overflow-y-auto">
             <PostImagePreview />
@@ -261,28 +264,28 @@ export function EditPostModal({
             <UploadField
               className="w-full"
               name="image"
-              label="Upload post image"
+              label={t("upload_post_image")}
               optional={postEditorFormSchema.shape.image.isNullable()}
               control={postEditorForm.control}
               onClear={clearPostImage}
             />
             <InputField
               name="title"
-              label="Title"
+              label={t("title")}
               showMessage={false}
               optional={postEditorFormSchema.shape.title.isNullable()}
               control={postEditorForm.control}
             />
             <TextareaField
               name="description"
-              label="Description"
+              label={t("description")}
               showMessage={false}
               control={postEditorForm.control}
               optional={postEditorFormSchema.shape.description.isNullable()}
             />
             <InputField
               name="address"
-              label="Address"
+              label={t("address")}
               type="text"
               showMessage={false}
               optional={postEditorFormSchema.shape.address.isNullable()}
@@ -290,7 +293,7 @@ export function EditPostModal({
             />
             <InputField
               name="postcode"
-              label="Zip code"
+              label={t("zip_code")}
               type="number"
               showMessage={false}
               optional={postEditorFormSchema.shape.postcode.isNullable()}
@@ -298,7 +301,7 @@ export function EditPostModal({
             />
             <InputField
               name="phone"
-              label="Phone"
+              label={t("phone")}
               type="phone"
               showMessage={false}
               optional={postEditorFormSchema.shape.phone.isNullable()}
@@ -309,7 +312,7 @@ export function EditPostModal({
                 className="w-full"
                 name="minAge"
                 type="number"
-                label="Min age"
+                label={t("min_age")}
                 showMessage={false}
                 control={postEditorForm.control}
                 optional={postEditorFormSchema.shape.minAge.isNullable()}
@@ -318,7 +321,7 @@ export function EditPostModal({
                 className="w-full"
                 name="maxAge"
                 type="number"
-                label="Max age"
+                label={t("max_age")}
                 showMessage={false}
                 control={postEditorForm.control}
                 optional={postEditorFormSchema.shape.maxAge.isNullable()}
@@ -327,7 +330,7 @@ export function EditPostModal({
             <SelectField
               className="w-full"
               name="category"
-              label="Category"
+              label={t("category")}
               showMessage={false}
               variants={POST_CATEGORIES.map((category) => ({
                 label: capitalizeFirstLetter(category.replaceAll("_", " ")),
@@ -339,7 +342,7 @@ export function EditPostModal({
             <InputField
               type="number"
               name="price"
-              label="Price"
+              label={t("price")}
               showMessage={false}
               control={postEditorForm.control}
               optional={postEditorFormSchema.shape.price.isNullable()}
@@ -365,18 +368,20 @@ function FootBar({
   onSubmitToDrafts: () => Promise<void>;
   onSubmitToPosts: () => Promise<void>;
 }) {
+  const t = useTranslations("Base");
+
   return (
     <div className="flex gap-2 justify-end">
       {isEditing ? (
-        <PendingButton onClick={onSubmitToPosts} text="Update" />
+        <PendingButton onClick={onSubmitToPosts} text={t("update")} />
       ) : (
         <>
           <PendingButton
             variant="ghost"
             onClick={onSubmitToDrafts}
-            text="To drafts"
+            text={t("to_drafts")}
           />
-          <PendingButton onClick={onSubmitToPosts} text="Add post" />
+          <PendingButton onClick={onSubmitToPosts} text={t("add_post")} />
         </>
       )}
     </div>

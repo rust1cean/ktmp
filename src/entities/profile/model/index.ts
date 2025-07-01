@@ -1,8 +1,12 @@
 import { createEffect } from "effector";
 
-import { becomeAuthor, getProfile } from "@/shared/data/profile/api";
+import {
+  becomeAuthor,
+  getProfile,
+  updateName,
+} from "@/shared/data/profile/api";
 import { profileDtoToProfileModel } from "./mapper";
-import { roleUpdated } from "../store";
+import { nameUpdated, roleUpdated } from "../store";
 
 export const getProfileFx = createEffect(
   async ({ profileId }: { profileId: string }) => {
@@ -29,5 +33,17 @@ export const becomeAuthorFx = createEffect(
     }
 
     roleUpdated("author");
+  }
+);
+
+export const updateNameFx = createEffect(
+  async (data: { profileId: string; name: string }) => {
+    const { error } = await updateName(data);
+
+    if (error) {
+      throw error;
+    }
+
+    nameUpdated(data.name);
   }
 );

@@ -8,6 +8,7 @@ import { signUpFx } from "@/entities/auth";
 import { MIN_PASSWORD_LENGTH } from "@/features/auth-modal/fields";
 import { Tab } from "@/features/auth-modal/tabs";
 import { userCreated } from "@/entities/auth";
+import { useTranslations } from "next-intl";
 
 export type SignUpTabProps = {
   onSuccess: (msg: string) => void;
@@ -20,6 +21,8 @@ export function SignUpTab({
   onFail,
   onSignInToExistingAccount,
 }: SignUpTabProps) {
+  const t = useTranslations("Base");
+
   const onUserCreated = useUnit(userCreated);
 
   const handleSignUp = async (credentials: SignUpFormData) => {
@@ -28,7 +31,7 @@ export function SignUpTab({
     if (error) {
       onFail(error.message);
     } else if (user) {
-      onSuccess("Registration completed");
+      onSuccess("registration_completed");
       onUserCreated(user);
     }
   };
@@ -36,8 +39,10 @@ export function SignUpTab({
   return (
     <Tab
       name="signUp"
-      title="Registration"
-      description={`Your password must contain a minimum of ${MIN_PASSWORD_LENGTH} characters, including uppercase and lowercase letters, numbers, and special characters`}
+      title={t("registration_title")}
+      description={t("registration_description", {
+        minPasswordLength: MIN_PASSWORD_LENGTH,
+      })}
     >
       <SignUpForm onSubmit={handleSignUp} />
       <OAuthProviders className="mx-auto" />
