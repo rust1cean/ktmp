@@ -41,12 +41,15 @@ export default async function RootLayout({
       <body className={`${interSans.variable} antialiased`}>
         <ClientProviders locale={locale} messages={messages}>
           <Header onNotifyUser={toast} />
-          <main className="px-[3vw] lg:px-[10vw] 2xl:px-[25vw] py-[2dvh] md:py-[5dvh]">
+          <main
+            id="app"
+            className="px-[3vw] lg:px-[10vw] 2xl:px-[25vw] py-[2dvh] md:py-[5dvh]"
+          >
             {children}
           </main>
+          <Toaster />
+          <PostDetailsModal />
         </ClientProviders>
-        <Toaster />
-        <PostDetailsModal />
       </body>
     </html>
   );

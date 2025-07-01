@@ -168,7 +168,7 @@ function PostDetails({
         icon={UsersRound}
       />
       <Badge
-        label={t("Phone")}
+        label={t("phone")}
         text={post.phone}
         icon={Phone}
         iconColor="text-green-600"
