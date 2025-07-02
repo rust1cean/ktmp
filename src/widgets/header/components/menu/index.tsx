@@ -95,8 +95,8 @@ export function SelectLanguage() {
   const t = useTranslations("Base");
   const router = useRouter();
 
-  function handleSelect(value: string) {
-    router.replace(`/${value}`);
+  function handleSelect(newLocale: string) {
+    router.replace(`/${newLocale}`);
   }
 
   return (

@@ -10,7 +10,7 @@ import "./globals.css";
 import { Header } from "@/widgets/header";
 import { Toaster } from "@/shared/shadcn/shadcn-ui/sonner";
 import { PostDetailsModal } from "@/widgets/post-details-modal";
-import ClientProviders from "./providers";
+import { ClientProviders } from "../../providers";
 
 const interSans = Inter({
   variable: "--font-inter-sans",
@@ -39,7 +39,11 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${interSans.variable} antialiased`}>
-        <ClientProviders locale={locale} messages={messages}>
+        <ClientProviders
+          locale={locale}
+          messages={messages}
+          timeZone="Europe/Athens"
+        >
           <Header onNotifyUser={toast} />
           <main
             id="app"
