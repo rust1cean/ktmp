@@ -97,6 +97,7 @@ export function SelectLanguage() {
 
   function handleSelect(newLocale: string) {
     router.replace(`/${newLocale}`);
+    router.refresh();
   }
 
   return (
