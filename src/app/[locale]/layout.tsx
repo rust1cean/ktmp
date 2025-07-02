@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { getMessages } from "next-intl/server";
 import type { Metadata } from "next";
 
 import "./globals.css";
@@ -33,11 +34,12 @@ export default async function RootLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+  const messages = await getMessages();
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${interSans.variable} antialiased`}>
-        <Providers locale={locale} timeZone="Europe/Athens">
+        <Providers locale={locale} messages={messages} timeZone="Europe/Athens">
           <Header onNotifyUser={toast} />
           <main
             id="app"
